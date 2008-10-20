@@ -1,6 +1,24 @@
 Changes in dtrx
 ===============
 
+Version 6.3
+-----------
+
+New features
+~~~~~~~~~~~~
+
+ * Add support for RAR archives.  Thanks to Peter Kelemen for the patch.
+
+Bug fixes
+~~~~~~~~~
+
+ * Previous versions of dtrx would fail to extract certain archive types
+   with the ``-v`` option specified.  This has been fixed.
+
+ * dtrx 6.3 no longer imports the sets module unless it's running under a
+   very old version of Python, to avoid deprecation warnings under Python
+   2.6.
+
 Version 6.2
 -----------
 
