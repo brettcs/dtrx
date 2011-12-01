@@ -1025,7 +1025,7 @@ class ExtractorBuilder(object):
     magic_map_matches = classmethod(magic_map_matches)
         
     def try_by_magic(cls, filename):
-        process = subprocess.Popen(['file', '-z', filename],
+        process = subprocess.Popen(['file', '-zL', filename],
                                    stdout=subprocess.PIPE)
         status = process.wait()
         if status != 0:
