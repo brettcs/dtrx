@@ -15,6 +15,11 @@
     cd test-1.23
     tar -jxf ../$1
 
+- name: basic .tar.lrz
+  filenames: test-1.23.tar.lrz
+  baseline: |
+    lrzcat $1 | tar -xf -
+
 - name: basic .zip
   filenames: test-1.23.zip
   baseline: |
@@ -126,6 +131,16 @@
   antigrep: "."
   baseline: |
     xzcat $1 >test-text
+  posttest: |
+    exec [ "$(cat test-text)" = "hi" ]
+
+- name: decompressing lrzip, not interactive
+  directory: inside-dir
+  filenames: ../test-text.lrz
+  options: ""
+  antigrep: "."
+  baseline: |
+    lrzcat $1 >test-text
   posttest: |
     exec [ "$(cat test-text)" = "hi" ]
 
