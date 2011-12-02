@@ -107,3 +107,66 @@ Peter
 .+'         `+...+'         `+...+'         `+...+'         `+...+'
 
 
+From - Thu Dec 01 18:53:16 2011
+Return-Path: <ville.skytta@iki.fi>
+X-Spam-Checker-Version: SpamAssassin 3.3.1 (2010-03-16) on llewellyn
+X-Spam-Level: 
+X-Spam-Status: No, score=-1.9 required=5.0 tests=BAYES_00,SPF_PASS
+	autolearn=ham version=3.3.1
+X-Original-To: me@brettcsmith.org
+Delivered-To: me@brettcsmith.org
+Received: from filtteri1.pp.htv.fi (filtteri1.pp.htv.fi [213.243.153.184])
+	by brettcsmith.org (Postfix) with ESMTP id A51BA67A6
+	for <me@brettcsmith.org>; Thu,  1 Dec 2011 02:22:59 -0500 (EST)
+Received: from localhost (localhost [127.0.0.1])
+	by filtteri1.pp.htv.fi (Postfix) with ESMTP id CC02018B3AA
+	for <me@brettcsmith.org>; Thu,  1 Dec 2011 09:22:58 +0200 (EET)
+X-Virus-Scanned: Debian amavisd-new at pp.htv.fi
+Received: from smtp5.welho.com ([213.243.153.39])
+	by localhost (filtteri1.pp.htv.fi [213.243.153.184]) (amavisd-new, port 10024)
+	with ESMTP id nX7Bob2-Ku0p for <me@brettcsmith.org>;
+	Thu,  1 Dec 2011 09:22:56 +0200 (EET)
+Received: from viper.bobcat.mine.nu (cs181085020.pp.htv.fi [82.181.85.20])
+	(using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
+	(No client certificate requested)
+	by smtp5.welho.com (Postfix) with ESMTPS id 50F675BC002
+	for <me@brettcsmith.org>; Thu,  1 Dec 2011 09:22:56 +0200 (EET)
+Message-ID: <4ED72B50.60000@iki.fi>
+Date: Thu, 01 Dec 2011 09:22:56 +0200
+From: =?ISO-8859-1?Q?Ville_Skytt=E4?= <ville.skytta@iki.fi>
+User-Agent: Mozilla/5.0 (X11; U; Linux x86_64; en-US; rv:1.9.2.24) Gecko/20111108 Fedora/3.1.16-1.fc14 Thunderbird/3.1.16
+MIME-Version: 1.0
+To: Brett Smith <me@brettcsmith.org>
+Subject: Re: [PATCH 0 of 3] Some trivial dtrx patches
+References: <patchbomb.1322320204@viper.bobcat.mine.nu> <4ED459D2.4090703@brettcsmith.org> <4ED52917.900@iki.fi> <4ED5B081.4040505@brettcsmith.org> <4ED68074.70500@iki.fi> <4ED6C398.8050101@brettcsmith.org>
+In-Reply-To: <4ED6C398.8050101@brettcsmith.org>
+X-Enigmail-Version: 1.1.2
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 8bit
+
+On 12/01/2011 02:00 AM, Brett Smith wrote:
+> On 11/30/2011 02:13 PM, Ville Skyttä wrote:
+>> BTW, you mentioned earlier that you were applying some of my initial
+>> trival patches but I don't see them in the public hg repo yet, did you
+>> find a problem with them?
+> 
+> No, no problem.  That's really weird -- they started showing up at 
+> <http://brettcsmith.org/2007/dtrx/dtrx/> as soon as I pushed them, and 
+> when I clone that repository with hg they show up in the log too.  How 
+> are you checking this?
+
+hg pull -u.  But I see the two first ones are indeed in the repository,
+so it's possible that I've managed to mess up something locally.  No
+problem, I'll probably just throw away my earlier clone.
+
+> I'm happy with the second round of patches too, but I meant to ask 
+> before I apply them: since they're more substantive, can I go ahead and 
+> add your copyright line to the source code?  And can you please just 
+> confirm that you're okay with this code being distributed under GPLv3 or 
+> later?
+
+Yes, go ahead, and GPLv3+ is fine.  (That means that I may need to
+switch from GPLv2+ to GPLv3+ for some other utilities I have that may be
+using dtrx in the future, but that shouldn't be a problem.)
+
+
