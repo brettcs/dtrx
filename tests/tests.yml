@@ -88,6 +88,13 @@
     cpio -i --make-directories <$1
   antigrep: blocks?
 
+- name: basic .rar
+  filenames: test-1.23.rar
+  baseline: |
+    mkdir test-1.23
+    cd test-1.23
+    unrar x ../$1
+
 - name: .deb metadata
   filenames: test-1.23_all.deb
   options: --metadata
