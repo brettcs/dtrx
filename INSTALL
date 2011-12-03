@@ -48,6 +48,9 @@ InstallShield archives
 rar archives
   unrar
 
+arj archives
+  arj
+
 Files compressed with gzip or compress
   zcat
 

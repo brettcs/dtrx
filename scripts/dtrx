@@ -624,6 +624,19 @@ class RarExtractor(NoPipeExtractor):
                     inside = True
             elif inside:
                 yield line.split(' ')[1]
+
+
+class ArjExtractor(NoPipeExtractor):
+    file_type = 'ARJ archive'
+    extract_command = ['arj', 'x', '-y']
+    list_command = ['arj', 'v']
+    prefix_re = re.compile(r'^\d+\)\s+')
+
+    def get_filenames(self):
+        for line in NoPipeExtractor.get_filenames(self):
+            match = self.prefix_re.match(line)
+            if match:
+                yield line[match.end():]
         self.archive.close()
 
 
@@ -927,6 +940,10 @@ class ExtractorBuilder(object):
                              'mimetypes': ('rar',),
                              'extensions': ('rar',),
                              'magic': ('RAR archive',)},
+                     'arj': {'extractors': (ArjExtractor,),
+                             'mimetypes': ('arj',),
+                             'extensions': ('arj',),
+                             'magic': ('ARJ archive',)},
                      'shield': {'extractors': (ShieldExtractor,),
                                 'mimetypes': ('x-cab',),
                                 'extensions': ('cab', 'hdr'),

@@ -22,9 +22,9 @@ setup(name="dtrx",
                      'Topic :: Utilities'],
       long_description = """dtrx extracts archives in a number of different
       formats; it currently supports tar, zip (including self-extracting
-      .exe files), cpio, rpm, deb, gem, 7z, cab, rar, lzh, and InstallShield
-      files.  It can also decompress files compressed with gzip, bzip2,
-      lzma, xz, lrzip, lzip, or compress.
+      .exe files), cpio, rpm, deb, gem, 7z, cab, rar, lzh, arj, and
+      InstallShield files.  It can also decompress files compressed with gzip,
+      bzip2, lzma, xz, lrzip, lzip, or compress.
 
       In addition to providing one command to handle many different archive
       types, dtrx also aids the user by extracting contents consistently.
