@@ -624,6 +624,7 @@ class RarExtractor(NoPipeExtractor):
                     inside = True
             elif inside:
                 yield line.split(' ')[1]
+        self.archive.close()
 
 
 class ArjExtractor(NoPipeExtractor):
