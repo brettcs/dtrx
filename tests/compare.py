@@ -43,7 +43,6 @@ else:
 DTRX_SCRIPT = os.path.realpath('../scripts/dtrx')
 SHELL_CMD = ['sh', '-se']
 ROOT_DIR = os.path.realpath(os.curdir)
-OUTCOMES = ['error', 'failed', 'passed']
 NUM_TESTS = 0
 
 class ExtractorTestError(Exception):
@@ -245,27 +244,48 @@ class ExtractorTest(object):
         return result
 
 
-test_db = open('tests.yml')
-test_data = yaml.load(test_db.read(-1))
-test_db.close()
-tests = [ExtractorTest(**data) for data in test_data]
-for original_data in test_data:
-    if (original_data.has_key('directory') or
-        (not original_data.has_key('baseline'))):
-        continue
-    data = original_data.copy()
-    data['name'] += ' in ..'
-    data['directory'] = 'inside-dir'
-    data['filenames'] = ' '.join(['../%s' % filename for filename in
-                                  data.get('filenames', '').split()])
-    tests.append(ExtractorTest(**data))
-results = [test.run() for test in tests]
-tests[-1].status_writer.clear()
-counts = {}
-for outcome in OUTCOMES:
-    counts[outcome] = 0
-for result in results:
-    counts[result] += 1
-print " Totals:", ', '.join(["%s %s" % (counts[key], key) for key in OUTCOMES])
-if counts["error"] + counts["failed"] > 0:
+class TestsRunner(object):
+    outcomes = ['error', 'failed', 'passed']
+
+    def __init__(self):
+        test_db = open('tests.yml')
+        self.test_data = yaml.load(test_db.read(-1))
+        test_db.close()
+        self.name_regexps = [re.compile(s) for s in sys.argv[1:]]
+        self.tests = [ExtractorTest(**data) for data in self.test_data
+                      if self.wanted_test(data)]
+        self.add_subdir_tests()
+
+    def wanted_test(self, data):
+        if not self.name_regexps:
+            return True
+        return filter(None, [r.search(data['name']) for r in self.name_regexps])
+
+    def add_subdir_tests(self):
+        for odata in self.test_data:
+            if ((not self.wanted_test(odata)) or odata.has_key('directory') or
+                (not odata.has_key('baseline'))):
+                continue
+            data = odata.copy()
+            data['name'] += ' in ..'
+            data['directory'] = 'inside-dir'
+            data['filenames'] = ' '.join(['../%s' % filename for filename in
+                                          data.get('filenames', '').split()])
+            self.tests.append(ExtractorTest(**data))
+
+    def run(self):
+        results = {}
+        for outcome in self.outcomes:
+            results[outcome] = 0
+        for test in self.tests:
+            results[test.run()] += 1
+        if self.tests:
+            self.tests[-1].status_writer.clear()
+        print "Totals:", ', '.join(["%s %s" % (results[key], key)
+                                    for key in self.outcomes])
+        return (results["error"] + results["failed"]) == 0
+
+
+runner = TestsRunner()
+if not runner.run():
     sys.exit(1)
