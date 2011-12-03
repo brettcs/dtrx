@@ -13,6 +13,8 @@ New features
  * dtrx now supports the arj archive, lrzip encoding, and several specific
    file extensions.
 
+ * If unar is available, dtrx can try to use it to extract rar archives.
+
 Bug fixes
 ~~~~~~~~~
 
