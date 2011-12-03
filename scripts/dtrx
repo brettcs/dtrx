@@ -572,7 +572,6 @@ class CABExtractor(NoPipeExtractor):
     border_re = re.compile(r'^[-\+]+$')
 
     def get_filenames(self):
-        fn_index = None
         filenames = NoPipeExtractor.get_filenames(self)
         for line in filenames:
             if self.border_re.match(line):
