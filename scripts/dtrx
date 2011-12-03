@@ -909,7 +909,7 @@ class ExtractorBuilder(object):
                              'magic': ('POSIX tar archive',)},
                      'zip': {'extractors': (ZipExtractor, SevenExtractor),
                              'mimetypes': ('zip',),
-                             'extensions': ('zip',),
+                             'extensions': ('zip', 'jar', 'epub', 'xpi'),
                              'magic': ('(Zip|ZIP self-extracting) archive',)},
                      'lzh': {'extractors': (LZHExtractor,),
                              'mimetypes': ('x-lzh', 'x-lzh-compressed'),
