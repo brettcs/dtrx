@@ -93,7 +93,7 @@
   baseline: |
     mkdir test-1.23
     cd test-1.23
-    unrar x ../$1
+    unar -D ../$1 || unrar x ../$1
 
 - name: basic .arj
   filenames: test-1.23.arj
@@ -302,17 +302,6 @@
     a/
     a/b
     foobar
-
-- name: list contents of .rar
-  options: -n -l
-  filenames: test-1.23.rar
-  output: |
-    1/2/3
-    a/b
-    foobar
-    1/2
-    1
-    a
 
 - name: list contents of .arj
   options: -n -l

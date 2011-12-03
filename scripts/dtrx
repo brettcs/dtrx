@@ -630,6 +630,19 @@ class RarExtractor(NoPipeExtractor):
         self.archive.close()
 
 
+class UnarchiverExtractor(NoPipeExtractor):
+    file_type = 'RAR archive'
+    extract_command = ['unar', '-D']
+    list_command = ['lsar']
+
+    def get_filenames(self):
+        output = NoPipeExtractor.get_filenames(self)
+        output.next()
+        for line in output:
+            end_index = line.rfind('(')
+            yield line[:end_index].strip()
+            
+
 class ArjExtractor(NoPipeExtractor):
     file_type = 'ARJ archive'
     extract_command = ['arj', 'x', '-y']
@@ -940,7 +953,7 @@ class ExtractorBuilder(object):
                              'mimetypes': ('x-cab',),
                              'extensions': ('cab',),
                              'magic': ('Microsoft Cabinet Archive',)},
-                     'rar': {'extractors': (RarExtractor,),
+                     'rar': {'extractors': (RarExtractor, UnarchiverExtractor),
                              'mimetypes': ('rar',),
                              'extensions': ('rar',),
                              'magic': ('RAR archive',)},
