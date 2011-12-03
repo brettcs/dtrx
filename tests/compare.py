@@ -87,7 +87,7 @@ class ExtractorTest(object):
                 directory_hint = '../'
             else:
                 directory_hint = ''
-            self.start_proc(SHELL_CMD + [directory_hint], commands)
+            self.start_proc(SHELL_CMD + [directory_hint], commands).wait()
 
     def get_shell_results(self):
         self.run_script('prerun')
