@@ -60,6 +60,12 @@ Files compressed with lzma
 Files compressed with xz
   xzcat
 
+Files compressed with lrzip
+  lrzcat
+
+Files compressed with lzip
+  lzip
+
 Installation
 ------------
 
