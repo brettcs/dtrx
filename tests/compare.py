@@ -17,12 +17,15 @@
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, see <http://www.gnu.org/licenses/>.
 
+import fcntl
 import os
 import re
+import struct
 import subprocess
-import yaml
 import sys
 import tempfile
+import termios
+import yaml
 
 try:
     set
@@ -41,13 +44,44 @@ DTRX_SCRIPT = os.path.realpath('../scripts/dtrx')
 SHELL_CMD = ['sh', '-se']
 ROOT_DIR = os.path.realpath(os.curdir)
 OUTCOMES = ['error', 'failed', 'passed']
+NUM_TESTS = 0
 
 class ExtractorTestError(Exception):
     pass
 
 
+class StatusWriter(object):
+    def __init__(self):
+        try:
+            size = fcntl.ioctl(sys.stdout.fileno(), termios.TIOCGWINSZ,
+                               struct.pack("HHHH", 0, 0, 0, 0))
+        except IOError:
+            self.show = self.show_file
+        else:
+            self.width = struct.unpack("HHHH", size)[1] - 1
+            self.last_width = self.width
+            self.show = self.show_term
+
+    def show_term(self, message):
+        sys.stdout.write(message.ljust(self.last_width) + "\r")
+        sys.stdout.flush()
+        self.last_width = max(self.width, len(message))
+
+    def show_file(self, message):
+        if message:
+            print message
+
+    def clear(self):
+        self.show("")
+        
+
 class ExtractorTest(object):
+    status_writer = StatusWriter()
+
     def __init__(self, **kwargs):
+        global NUM_TESTS
+        NUM_TESTS += 1
+        self.test_num = NUM_TESTS
         setattr(self, 'name', kwargs['name'])
         setattr(self, 'options', kwargs.get('options', '-n').split())
         setattr(self, 'filenames', kwargs.get('filenames', '').split())
@@ -123,17 +157,21 @@ class ExtractorTest(object):
             raise ExtractorTestError("cleanup exited with status code %s" %
                                      (status,))
 
-    def show_status(self, status, message=None):
-        raw_status = status.lower()
-        if raw_status != 'passed':
-            self.outbuffer.seek(0, 0)
-            sys.stdout.write(self.outbuffer.read(-1))
+    def show_pass(self):
+        self.status_writer.show("Passed %i/%i: %s" %
+                                (self.test_num, NUM_TESTS, self.name))
+        return 'passed'
+
+    def show_report(self, status, message=None):
+        self.status_writer.clear()
+        self.outbuffer.seek(0, 0)
+        sys.stdout.write(self.outbuffer.read(-1))
         if message is None:
             last_part = ''
         else:
             last_part = ': %s' % (message,)
-        print "%7s: %s%s" % (status, self.name, last_part)
-        return raw_status
+        print "%s: %s%s\n" % (status, self.name, last_part)
+        return status.lower()
 
     def compare_results(self, actual):
         posttest_result = self.get_posttest_result()
@@ -145,11 +183,11 @@ class ExtractorTest(object):
             print >>self.outbuffer, '\n'.join(expected.difference(actual))
             print >>self.outbuffer, "Only in actual results:"
             print >>self.outbuffer, '\n'.join(actual.difference(expected))
-            return self.show_status('FAILED')
+            return self.show_report('FAILED')
         elif posttest_result != 0:
             print >>self.outbuffer, "Posttest gave status code", posttest_result
-            return self.show_status('FAILED')
-        return self.show_status('Passed')
+            return self.show_report('FAILED')
+        return self.show_pass()
     
     def have_error_mismatch(self, status):
         if self.error and (status == 0):
@@ -183,12 +221,12 @@ class ExtractorTest(object):
         problem = (self.have_error_mismatch(status) or
                    self.check_output(output) or self.grep_output(output))
         if problem:
-            return self.show_status('FAILED', problem)
+            return self.show_report('FAILED', problem)
         if self.baseline is not None:
             return self.compare_results(actual)
         else:
             self.clean()
-            return self.show_status('Passed')
+            return self.show_pass()
 
     def run(self):
         self.outbuffer = tempfile.TemporaryFile()
@@ -198,7 +236,7 @@ class ExtractorTest(object):
         try:
             result = self.check_results()
         except ExtractorTestError, error:
-            result = self.show_status('ERROR', error)
+            result = self.show_report('ERROR', error)
         self.outbuffer.close()
         if self.directory:
             os.chdir(ROOT_DIR)
@@ -222,6 +260,7 @@ for original_data in test_data:
                                   data.get('filenames', '').split()])
     tests.append(ExtractorTest(**data))
 results = [test.run() for test in tests]
+tests[-1].status_writer.clear()
 counts = {}
 for outcome in OUTCOMES:
     counts[outcome] = 0
