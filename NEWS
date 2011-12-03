@@ -1,6 +1,36 @@
 Changes in dtrx
 ===============
 
+Version 7.2
+-----------
+
+Thanks to Ville Skyllä, who contributed most of the new features and
+enhancements in this release.
+
+New features
+~~~~~~~~~~~~
+
+ * dtrx now supports the arj archive, lrzip encoding, and several specific
+   file extensions.
+
+Bug fixes
+~~~~~~~~~
+
+ * dtrx will get correct file magic information for archives it's reading
+   through symbolic links.
+
+ * File listings for rar archives now include full paths.
+
+Development changes
+~~~~~~~~~~~~~~~~~~~
+
+ * dtrx development is now `hosted on Gitorious`_.
+
+.. _hosted on Gitorious: http://gitorious.org/dtrx
+
+ * The test script can run specific tests, and has improved output on
+   interactive terminals.
+
 Version 7.1
 -----------
 
