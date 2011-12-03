@@ -611,11 +611,12 @@ class ShieldExtractor(NoPipeExtractor):
 class RarExtractor(NoPipeExtractor):
     file_type = 'RAR archive'
     extract_command = ['unrar', 'x']
-    list_command = ['unrar', 'l']
+    list_command = ['unrar', 'v']
     border_re = re.compile('^-+$')
 
     def get_filenames(self):
         inside = False
+        isfile = True
         for line in NoPipeExtractor.get_filenames(self):
             if self.border_re.match(line):
                 if inside:
@@ -623,7 +624,9 @@ class RarExtractor(NoPipeExtractor):
                 else:
                     inside = True
             elif inside:
-                yield line.split(' ')[1]
+                if isfile:
+                    yield line.strip()
+                isfile = not isfile
         self.archive.close()
 
 
