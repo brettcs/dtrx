@@ -927,7 +927,7 @@ class ExtractorBuilder(object):
                      'lzh': {'extractors': (LZHExtractor,),
                              'mimetypes': ('x-lzh', 'x-lzh-compressed'),
                              'extensions': ('lzh', 'lha'),
-                             'magic': ('LHa [\d\.\?]+ archive',)},
+                             'magic': (r'LHa [\d\.\?]+ archive',)},
                      'rpm': {'extractors': (RPMExtractor,),
                              'mimetypes': ('x-redhat-package-manager', 'x-rpm'),
                              'extensions': ('rpm',),
