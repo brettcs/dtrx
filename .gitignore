@@ -1,1 +1,6 @@
 build
+
+# noahp added
+/.tox/
+/.eggs/
+/*.egg-info/
