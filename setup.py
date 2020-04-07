@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name="dtrx-noahp",
-    version="7.1.noahp.0",
+    version="7.1.0",
     description="Script to intelligently extract multiple archive types",
     author="Brett Smith",
     author_email="brettcsmith@brettcsmith.org",
