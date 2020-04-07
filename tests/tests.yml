@@ -109,7 +109,7 @@
     mkdir test-1.23
     cd test-1.23
     ar p ../$1 control.tar.gz | tar -zx
-    
+
 - name: .gem metadata
   filenames: test-1.23.gem
   options: -m
@@ -215,7 +215,7 @@
     cd test-1.23
     tar -jxf ../$1
   prerun: |
-    mkdir test-1.23 
+    mkdir test-1.23
 
 - name: flat option
   directory: inside-dir
@@ -284,6 +284,7 @@
   options: -n -l
   filenames: test-1.23.tar
   output: |
+    test-1.23.tar:
     test-1.23/
     test-1.23/1/
     test-1.23/1/2/
@@ -296,6 +297,7 @@
   options: -n -l
   filenames: test-1.23.lzh
   output: |
+    test-1.23.lzh:
     1/
     1/2/
     1/2/3
@@ -307,6 +309,7 @@
   options: -n -l
   filenames: test-1.23.arj
   output: |
+    test-1.23.arj:
     a/b
     1/2/3
     foobar
@@ -328,7 +331,7 @@
     a/
     a/b
     foobar
-    
+
     test-1.23.zip:
     1/2/3
     a/b
@@ -337,7 +340,9 @@
 - name: list contents of compressed file
   options: -n -t
   filenames: test-text.gz
-  output: test-text
+  output: |
+    test-text.gz:
+    test-text
 
 - name: default behavior with one directory (gz)
   options: -n
@@ -631,7 +636,7 @@
     1/2/3
     a/b
     foobar
-    
+
     trickery.tar.gz:
     1/2/3
     a/b
@@ -722,7 +727,7 @@
     test-onedir/test/
     test-onedir/test/foobar
     test-onedir/test/quux
-    
+
     test-text.gz:
     test-text
 
@@ -731,6 +736,7 @@
   directory: busydir
   filenames: ../test-onedir.tar.gz
   output: |
+    ../test-onedir.tar.gz:
     test/
     test/foobar
     test/quux
@@ -780,15 +786,16 @@
 - name: listing empty archive
   filenames: test-empty.tar.bz2
   options: -l
-  antigrep: '.'
+  baseline: |
+    test-empty.tar.bz2:
 
 - name: download and extract
-  filenames: http://brettcsmith.org/2007/dtrx/test-download.gz
+  filenames: https://raw.githubusercontent.com/noahp/dtrx/master/tests/test-text.gz
   directory: inside-dir
   baseline: |
     wget "$1"
-    zcat test-download.gz >test-download
-  cleanup: rm -f test-download.gz test-download
+    zcat test-text.gz >test-text
+  cleanup: rm -f test-text.gz test-text
 
 - name: recursive archive without prompt
   filenames: test-recursive-no-prompt.tar.bz2

@@ -3,8 +3,8 @@
 from setuptools import setup
 
 setup(
-    name="noahp-dtrx",
-    version="7.1.noahp",
+    name="dtrx-noahp",
+    version="7.1.noahp.0",
     description="Script to intelligently extract multiple archive types",
     author="Brett Smith",
     author_email="brettcsmith@brettcsmith.org",

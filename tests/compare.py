@@ -17,6 +17,7 @@
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import print_function
 import fcntl
 import os
 import re
@@ -37,7 +38,7 @@ if os.path.exists('scripts/dtrx') and os.path.exists('tests'):
 elif os.path.exists('../scripts/dtrx') and os.path.exists('../tests'):
     pass
 else:
-    print "ERROR: Can't run tests in this directory!"
+    print("ERROR: Can't run tests in this directory!")
     sys.exit(2)
 
 DTRX_SCRIPT = os.path.realpath('../scripts/dtrx')
@@ -68,11 +69,11 @@ class StatusWriter(object):
 
     def show_file(self, message):
         if message:
-            print message
+            print(message)
 
     def clear(self):
         self.show("")
-        
+
 
 class ExtractorTest(object):
     status_writer = StatusWriter()
@@ -99,20 +100,20 @@ class ExtractorTest(object):
         process = subprocess.Popen(command, stdin=subprocess.PIPE,
                                    stdout=output, stderr=output)
         if stdin:
-            process.stdin.write(stdin)
+            process.stdin.write(bytes(str(stdin).encode("utf-8")))
         process.stdin.close()
         return process
 
     def get_results(self, command, stdin=None):
-        print >>self.outbuffer, "Output from %s:" % (' '.join(command),)
+        print("Output from %s:" % (' '.join(command),), file=self.outbuffer)
         self.outbuffer.flush()
         status = self.start_proc(command, stdin, self.outbuffer).wait()
         process = subprocess.Popen(['find'], stdout=subprocess.PIPE)
-        output = process.stdout.read(-1)
+        output = process.stdout.read(-1).decode("ascii", errors="ignore")
         process.stdout.close()
         process.wait()
         return status, set(output.split('\n'))
-        
+
     def run_script(self, key):
         commands = getattr(self, key)
         if commands is not None:
@@ -130,7 +131,7 @@ class ExtractorTest(object):
         self.run_script('prerun')
         return self.get_results([DTRX_SCRIPT] + self.options + self.filenames,
                                 self.input)
-        
+
     def get_posttest_result(self):
         if not self.posttest:
             return 0
@@ -169,7 +170,7 @@ class ExtractorTest(object):
             last_part = ''
         else:
             last_part = ': %s' % (message,)
-        print "%s: %s%s\n" % (status, self.name, last_part)
+        print("%s: %s%s\n" % (status, self.name, last_part))
         return status.lower()
 
     def compare_results(self, actual):
@@ -178,16 +179,16 @@ class ExtractorTest(object):
         status, expected = self.get_shell_results()
         self.clean()
         if expected != actual:
-            print >>self.outbuffer, "Only in baseline results:"
-            print >>self.outbuffer, '\n'.join(expected.difference(actual))
-            print >>self.outbuffer, "Only in actual results:"
-            print >>self.outbuffer, '\n'.join(actual.difference(expected))
+            print("Only in baseline results:", file=self.outbuffer)
+            print('\n'.join(expected.difference(actual)), file=self.outbuffer)
+            print("Only in actual results:", file=self.outbuffer)
+            print('\n'.join(actual.difference(expected)), file=self.outbuffer)
             return self.show_report('FAILED')
         elif posttest_result != 0:
-            print >>self.outbuffer, "Posttest gave status code", posttest_result
+            print("Posttest gave status code", posttest_result, file=self.outbuffer)
             return self.show_report('FAILED')
         return self.show_pass()
-    
+
     def have_error_mismatch(self, status):
         if self.error and (status == 0):
             return "dtrx did not return expected error"
@@ -208,7 +209,7 @@ class ExtractorTest(object):
     def check_output(self, output):
         if ((self.output is not None) and
             (self.output.strip() != output.strip())):
-            return "output did not match provided text"
+            return "output did not match provided text:\n{}\nVS:\n{}".format(repr(self.output), repr(output))
         return None
 
     def check_results(self):
@@ -228,13 +229,13 @@ class ExtractorTest(object):
             return self.show_pass()
 
     def run(self):
-        self.outbuffer = tempfile.TemporaryFile()
+        self.outbuffer = tempfile.TemporaryFile(mode="w+")
         if self.directory:
             os.mkdir(self.directory)
             os.chdir(self.directory)
         try:
             result = self.check_results()
-        except ExtractorTestError, error:
+        except ExtractorTestError as error:
             result = self.show_report('ERROR', error)
         self.outbuffer.close()
         if self.directory:
@@ -263,8 +264,8 @@ class TestsRunner(object):
 
     def add_subdir_tests(self):
         for odata in self.test_data:
-            if ((not self.wanted_test(odata)) or odata.has_key('directory') or
-                (not odata.has_key('baseline'))):
+            if ((not self.wanted_test(odata)) or 'directory' in odata or
+                ('baseline' not in odata)):
                 continue
             data = odata.copy()
             data['name'] += ' in ..'
@@ -281,8 +282,8 @@ class TestsRunner(object):
             results[test.run()] += 1
         if self.tests:
             self.tests[-1].status_writer.clear()
-        print "Totals:", ', '.join(["%s %s" % (results[key], key)
-                                    for key in self.outcomes])
+        print("Totals:", ', '.join(["%s %s" % (results[key], key)
+                                    for key in self.outcomes]))
         return (results["error"] + results["failed"]) == 0
 
 

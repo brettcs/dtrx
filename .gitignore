@@ -4,3 +4,4 @@ build
 /.tox/
 /.eggs/
 /*.egg-info/
+/dist/

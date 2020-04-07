@@ -21,3 +21,16 @@ Main dtrx pypi page is here:
 
 This repo is just enough patch to deploy a `dtrx-noah` to pypi so I can keep
 using this tool on Ubuntu 20.04.
+
+I attempted to get the tests all working via `tox` , for which I used a
+Dockerfile to try to get some kind of environment consistency. You could run the
+tests like:
+
+```shell
+# build the image
+docker build -t "dtrx" -f Dockerfile --build-arg UID=$(id -u) .
+
+# run rox in the container. note tox is being run serially (no -p auto), in case
+# the working dir gets abused by the test script
+docker run -v"$(pwd):/mnt/workspace" -t dtrx bash -c "cd /mnt/workspace && tox -s true"
+```
