@@ -30,7 +30,7 @@ tests like:
 # build the image
 docker build -t "dtrx" -f Dockerfile --build-arg UID=$(id -u) .
 
-# run rox in the container. note tox is being run serially (no -p auto), in case
+# run tox in the container. note tox is being run serially (no -p auto), in case
 # the working dir gets abused by the test script
 docker run -v"$(pwd):/mnt/workspace" -t dtrx bash -c "cd /mnt/workspace && tox -s true"
 ```

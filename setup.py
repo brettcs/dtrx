@@ -9,7 +9,7 @@ with io.open("README.md", "rt", encoding="utf8") as readmefile:
 
 setup(
     name="dtrx-noahp",
-    version="7.1.1",
+    version="7.1.2",
     description="Script to intelligently extract multiple archive types",
     author="Brett Smith",
     author_email="brettcsmith@brettcsmith.org",
