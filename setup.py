@@ -1,10 +1,15 @@
 #!/usr/bin/env python
 
+import io
 from setuptools import setup
+
+ # Get long description from readme
+with io.open("README.md", "rt", encoding="utf8") as readmefile:
+    README = readmefile.read()
 
 setup(
     name="dtrx-noahp",
-    version="7.1.0",
+    version="7.1.1",
     description="Script to intelligently extract multiple archive types",
     author="Brett Smith",
     author_email="brettcsmith@brettcsmith.org",
@@ -28,20 +33,20 @@ setup(
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
     ],
-    long_description="""dtrx extracts archives in a number of different
-      formats; it currently supports tar, zip (including self-extracting
-      .exe files), cpio, rpm, deb, gem, 7z, cab, rar, lzh, arj, and
-      InstallShield files.  It can also decompress files compressed with gzip,
-      bzip2, lzma, xz, lrzip, lzip, or compress.
+    # long_description="""dtrx extracts archives in a number of different
+    #   formats; it currently supports tar, zip (including self-extracting
+    #   .exe files), cpio, rpm, deb, gem, 7z, cab, rar, lzh, arj, and
+    #   InstallShield files.  It can also decompress files compressed with gzip,
+    #   bzip2, lzma, xz, lrzip, lzip, or compress.
 
-      In addition to providing one command to handle many different archive
-      types, dtrx also aids the user by extracting contents consistently.
-      By default, everything will be written to a dedicated directory
-      that's named after the archive.  dtrx will also change the
-      permissions to ensure that the owner can read and write all those
-      files.""",
-    #     long_description=README,
-    #     long_description_content_type="text/markdown",
+    #   In addition to providing one command to handle many different archive
+    #   types, dtrx also aids the user by extracting contents consistently.
+    #   By default, everything will be written to a dedicated directory
+    #   that's named after the archive.  dtrx will also change the
+    #   permissions to ensure that the owner can read and write all those
+    #   files.""",
+    long_description=README,
+    long_description_content_type="text/markdown",
     # using markdown as pypi description:
     # https://dustingram.com/articles/2018/03/16/markdown-descriptions-on-pypi
     setup_requires=["setuptools>=38.6.0", "wheel>=0.31.0", "twine>=1.11.0"],
