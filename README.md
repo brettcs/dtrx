@@ -1,10 +1,6 @@
-====
-dtrx
-====
+# dtrx
 
-----------------------------------
-cleanly extract many archive types
-----------------------------------
+> cleanly extract many archive types
 
 :Author: Brett Smith <brettcsmith@brettcsmith.org>
 :Date:   2011-11-19
@@ -14,30 +10,34 @@ cleanly extract many archive types
   send comments, bug reports, patches, and so on.  You can find the latest
   version of dtrx on its home page at
   <http://www.brettcsmith.org/2007/dtrx/>.
-  
+
   dtrx is free software; you can redistribute it and/or modify it under the
   terms of the GNU General Public License as published by the Free Software
   Foundation; either version 3 of the License, or (at your option) any
   later version.
-  
+
   This program is distributed in the hope that it will be useful, but
   WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General
   Public License for more details.
-  
+
   You should have received a copy of the GNU General Public License along
   with this program; if not, see <http://www.gnu.org/licenses/>.
 
 :Version: 7.1
 :Manual section: 1
 
-SYNOPSIS
-========
+## SYNOPSIS
 
-dtrx [OPTIONS] ARCHIVE [ARCHIVE ...]
+`dtrx [OPTIONS] ARCHIVE [ARCHIVE ...]`
 
-DESCRIPTION
-===========
+## INSTALLATION
+
+Copy [scripts/dtrx](scripts/dtrx) to a directory on PATH.
+
+TODO- deploy to pypi to make it pip-installable!
+
+## DESCRIPTION
 
 dtrx extracts archives in a number of different formats; it currently
 supports tar, zip (including self-extracting .exe files), cpio, rpm, deb,
@@ -60,11 +60,11 @@ You may specify URLs as arguments as well.  If you do, dtrx will use `wget
 downloads.  This may fail if you already have a file in the current
 directory with the same name as the file you're trying to download.
 
-OPTIONS
-=======
+## OPTIONS
 
 dtrx supports a number of options to mandate specific behavior:
 
+```manpage
 -r, --recursive
    With this option, dtrx will search inside the archives you specify to see
    if any of the contents are themselves archives, and extract those as
@@ -124,3 +124,21 @@ dtrx supports a number of options to mandate specific behavior:
 
 --version
    Display dtrx's version, copyright, and license information.
+```
+
+## TESTING
+
+[tests/compare.py](tests/compare.py) is a script that loads
+[tests/tests.yml](tests/tests.yml) and runs some tests on various archive
+formats. To handle all the formats, a variety of tools need to be installed on
+the test system. A Dockerfile is provided for convenience to test without
+modifying the host system. To use the Dockerfile to run the tests, you might do:
+
+```shell
+# build the image
+docker build -t "dtrx" -f Dockerfile --build-arg UID=$(id -u) .
+
+# run tox in the container. note tox is being run serially (no -p auto), in case
+# the working dir gets abused by the test script
+docker run -v"$(pwd):/mnt/workspace" -t dtrx bash -c "cd /mnt/workspace && tox -s true"
+```
