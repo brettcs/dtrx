@@ -1,10 +1,15 @@
 #!/usr/bin/env python
 
 import io
+import os
+
 from setuptools import setup
 
- # Get long description from readme
-with io.open("README.md", "rt", encoding="utf8") as readmefile:
+# Get long description from readme
+README_PATH = os.path.abspath(
+    os.path.join(os.environ.get("TOX_INI_DIR", "."), "README.md")
+)
+with io.open(README_PATH, "rt", encoding="utf8") as readmefile:
     README = readmefile.read()
 
 setup(

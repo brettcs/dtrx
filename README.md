@@ -1,4 +1,20 @@
+[![PyPI
+version](https://img.shields.io/pypi/v/dtrx-noahp.svg?style=for-the-badge)](https://pypi.org/project/dtrx-noahp/)
+[![PyPI
+pyversions](https://img.shields.io/pypi/pyversions/dtrx-noahp.svg?style=for-the-badge)](https://pypi.python.org/pypi/dtrx-noahp/)
+
 # dtrx-noah
+
+"**Do The Right eXtraction**" - don't remeber what set of `tar` flags or where to
+pipe the output to extract it? no worries!
+
+TL;DR
+
+```bash
+pip install dtrx-noahp
+
+dtrx yolo.tar.gz
+```
 
 This is a copy-paste of the original dtrx repo:
 
@@ -17,20 +33,17 @@ Main dtrx pypi page is here:
 
 📦🐍🌀
 
+I've submitted these changes to https://github.com/brettcs/dtrx/pull/1 .
+
 ## What is this repo then
 
 This repo is just enough patch to deploy a `dtrx-noah` to pypi so I can keep
 using this tool on Ubuntu 20.04.
 
 I attempted to get the tests all working via `tox` , for which I used a
-Dockerfile to try to get some kind of environment consistency. You could run the
-tests like:
+Dockerfile to try to get some kind of environment consistency. You can run the
+tests by running:
 
-```shell
-# build the image
-docker build -t "dtrx" -f Dockerfile --build-arg UID=$(id -u) .
-
-# run tox in the container. note tox is being run serially (no -p auto), in case
-# the working dir gets abused by the test script
-docker run -v"$(pwd):/mnt/workspace" -t dtrx bash -c "cd /mnt/workspace && tox -s true"
+```bash
+./test.sh
 ```
