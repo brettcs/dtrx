@@ -5,7 +5,7 @@ pyversions](https://img.shields.io/pypi/pyversions/dtrx-noahp.svg?style=for-the-
 
 # dtrx-noah
 
-"**Do The Right eXtraction**" - don't remeber what set of `tar` flags or where to
+"**Do The Right eXtraction**" - don't remember what set of `tar` flags or where to
 pipe the output to extract it? no worries!
 
 TL;DR
