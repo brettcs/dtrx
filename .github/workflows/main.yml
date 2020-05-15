@@ -20,3 +20,9 @@ jobs:
       # build the Docker image we use to run the tests
       - name: test.sh
         run: ./test.sh
+
+      # upload-artifact to save the py27 wheel
+      - uses: actions/upload-artifact@v1
+        with:
+          name: py27-wheel-output
+          path: .tox/py27/dist/
