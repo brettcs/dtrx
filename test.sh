@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Simple test script to run the tox command in docker
+# Simple test script to run the tests in docker
 
 # Error on any non-zero command, and print the commands as they're run
 set -ex
@@ -11,13 +11,12 @@ if ! command -v docker; then
     exit 1
 fi
 
-# This environment variable is set in github actions. When running on another
-# host, set a default.
-GITHUB_REPOSITORY=${GITHUB_REPOSITORY:-dtrx}
+# Set the docker image name to default to repo basename
+DOCKER_IMAGE_NAME=${DOCKER_IMAGE_NAME:-$(basename -s .git "$(git remote --verbose | awk 'NR==1 { print tolower($2) }')")}
 
 # build the docker image
-DOCKER_BUILDKIT=1 docker build -t "$GITHUB_REPOSITORY" --build-arg "UID=$(id -u)" -f Dockerfile .
+DOCKER_BUILDKIT=1 docker build -t "$DOCKER_IMAGE_NAME" --build-arg "UID=$(id -u)" -f Dockerfile .
 
 # execute tox in the docker container. don't run in parallel; conda has issues
 # when we do this (pkg cache operations are not atomic!)
-docker run -v "$(pwd)":/mnt/workspace -t "$GITHUB_REPOSITORY" bash -c "cd /mnt/workspace && tox"
+docker run -v "$(pwd)":/mnt/workspace -t "$DOCKER_IMAGE_NAME" bash -c "cd /mnt/workspace && tox"

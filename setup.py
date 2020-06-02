@@ -13,8 +13,8 @@ with io.open(README_PATH, "rt", encoding="utf8") as readmefile:
     README = readmefile.read()
 
 setup(
-    name="dtrx-noahp",
-    version="7.1.3",
+    name="dtrx",
+    version="8.0.0",
     description="Script to intelligently extract multiple archive types",
     author="Brett Smith",
     author_email="brettcsmith@brettcsmith.org",
