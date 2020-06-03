@@ -790,7 +790,7 @@
     test-empty.tar.bz2:
 
 - name: download and extract
-  filenames: https://raw.githubusercontent.com/noahp/dtrx/master/tests/test-text.gz
+  filenames: https://raw.githubusercontent.com/dtrx-py/dtrx/master/tests/test-text.gz
   directory: inside-dir
   baseline: |
     wget "$1"

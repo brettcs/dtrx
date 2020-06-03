@@ -14,13 +14,13 @@ with io.open(README_PATH, "rt", encoding="utf8") as readmefile:
 
 setup(
     name="dtrx",
-    version="8.0.0",
+    version="8.0.1",
     description="Script to intelligently extract multiple archive types",
     author="Brett Smith",
     author_email="brettcsmith@brettcsmith.org",
     url="http://www.brettcsmith.org/2007/dtrx/",
-    project_urls={"Code": "https://github.com/noahp/dtrx",},
-    download_url="https://github.com/noahp/dtrx",
+    project_urls={"Code": "https://github.com/dtrx-py/dtrx",},
+    download_url="https://github.com/dtrx-py/dtrx",
     scripts=["scripts/dtrx"],
     license="GNU General Public License, version 3 or later",
     classifiers=[

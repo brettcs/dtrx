@@ -2,14 +2,14 @@
 version](https://img.shields.io/pypi/v/dtrx.svg?style=for-the-badge)](https://pypi.org/project/dtrx/)
 [![PyPI
 pyversions](https://img.shields.io/pypi/pyversions/dtrx.svg?style=for-the-badge)](https://pypi.python.org/pypi/dtrx/)
+[![GitHub](https://img.shields.io/badge/GitHub-repo-brightgreen?style=for-the-badge)](https://github.com/dtrx-py/dtrx)
 
-- [dtrx-noah](#dtrx-noah)
-  - [What is this repo then](#what-is-this-repo-then)
+- [dtrx](#dtrx)
+  - [Changes in this repo](#changes-in-this-repo)
   - [TODO](#todo)
-    - [Repo relocating](#repo-relocating)
     - [Python 3.9](#python-39)
 
-# dtrx-noah
+# dtrx
 
 "**Do The Right eXtraction**" - don't remember what set of `tar` flags or where to
 pipe the output to extract it? no worries!
@@ -22,18 +22,19 @@ pip install dtrx
 dtrx yolo.tar.gz
 ```
 
-This is a copy-paste of the original dtrx repo, and all credit for this software
-should be attributed to the original authoer, Brett Smith @brettcs:
+This is a copy-paste of the original dtrx repo, and **all credit for this
+software** should be attributed to the original author, Brett Smith @brettcs:
 
 https://github.com/brettcs/dtrx
 
 See the original [`README`](README) for more details on what this does!
 
-## What is this repo then
+## Changes in this repo
 
-This repo is just enough patch to deploy a `dtrx-noah` to pypi so I can keep
-using this tool on Ubuntu 20.04 (it's not longer available on the default apt
-sources).
+This repo contains some patches on top of the original source to enable using
+`dtrx` with python3. The original motivation was to enable `dtrx` on Ubuntu
+20.04+, where the `dtrx` apt package was removed from the default ppas (likely
+due to being python2 only).
 
 I attempted to get the tests all working via `tox` , for which I used a
 Dockerfile to try to get some kind of environment consistency. You can run the
@@ -44,14 +45,6 @@ tests by running (requires Docker installed):
 ```
 
 ## TODO
-
-### Repo relocating
-
-Thanks to @ChrisJefferson , this package is now deployed to PyPi under the
-`dtrx` name: https://pypi.org/project/dtrx/
-
-This repo will be moved to a new location very soon, and package links updated
-etc.
 
 ### Python 3.9
 
