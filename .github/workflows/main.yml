@@ -9,8 +9,13 @@ on:
       - master
 
 jobs:
-  ci:
+  build:
+
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: [py27, py36, py37, py38, py39]
+
     steps:
       # checkout v2, with recursive submodule update
       - uses: actions/checkout@v2
@@ -19,10 +24,10 @@ jobs:
 
       # build the Docker image we use to run the tests
       - name: test.sh
-        run: ./test.sh
+        run: TOX_ARGS='-e ${{ matrix.python }}' ./test.sh
 
-      # upload-artifact to save the py27 wheel
+      # upload-artifact to save the output wheels
       - uses: actions/upload-artifact@v1
         with:
-          name: py27-wheel-output
-          path: .tox/py27/dist/
+          name: ${{ matrix.python }}-wheel-output
+          path: .tox/${{ matrix.python }}/dist/
