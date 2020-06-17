@@ -249,9 +249,11 @@ class TestsRunner(object):
     outcomes = ['error', 'failed', 'passed']
 
     def __init__(self):
-        test_db = open('tests.yml')
-        self.test_data = yaml.load(test_db.read(-1))
-        test_db.close()
+        with open('tests.yml', 'rb') as test_db:
+            self.test_data = yaml.load(
+                test_db.read(-1).decode("utf-8", errors="ignore"),
+                Loader=yaml.FullLoader,
+            )
         self.name_regexps = [re.compile(s) for s in sys.argv[1:]]
         self.tests = [ExtractorTest(**data) for data in self.test_data
                       if self.wanted_test(data)]

@@ -76,6 +76,11 @@ WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General
 Public License for more details.""" % (VERSION,)
 
+# Python3.6 optparse has a hard time parsing this, so ascii transform it
+if sys.version_info[:2] == (3, 6):
+    VERSION_BANNER = VERSION_BANNER.encode("ascii", errors="ignore").decode("ascii")
+
+
 MATCHING_DIRECTORY = 1
 ONE_ENTRY_KNOWN = 2
 BOMB = 3
