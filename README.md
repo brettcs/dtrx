@@ -8,8 +8,6 @@ pyversions](https://img.shields.io/pypi/pyversions/dtrx.svg?style=for-the-badge&
 
 - [dtrx](#dtrx)
   - [Changes in this repo](#changes-in-this-repo)
-  - [TODO](#todo)
-    - [Python 3.9](#python-39)
 
 # dtrx
 
@@ -45,10 +43,3 @@ tests by running (requires Docker installed):
 ```bash
 ./test.sh
 ```
-
-## TODO
-
-### Python 3.9
-
-Now that python 3.9 has entered the RC stage, we should include a target
-classifier and support 3.9 in the test suite!

@@ -7,6 +7,7 @@ RUN apt-get update && apt-get install -y \
     cpio \
     gzip \
     lhasa \
+    libffi-dev \
     lrzip \
     lzip \
     p7zip-full \
@@ -18,6 +19,19 @@ RUN apt-get update && apt-get install -y \
     wget \
     zip
 
+# Install the python versions
+RUN \
+    apt-get install -y software-properties-common && \
+    add-apt-repository ppa:deadsnakes/ppa && apt-get update && \
+    bash -c "\
+        apt-get install -y \
+            python2.7{,-dev} \
+            python3.6{,-dev} \
+            python3.7{,-dev,-distutils} \
+            python3.8{,-dev} \
+            python3.9{,-dev,-distutils}\
+            python3-distutils"
+
 # create a user inside the container. if you specify your UID when building the
 # image, you can mount directories into the container with read-write access:
 # docker build -t "dtrx" -f Dockerfile --build-arg UID=$(id -u) .
@@ -26,17 +40,9 @@ ARG UNAME=builder
 RUN useradd --uid ${UID} --create-home --user-group ${UNAME} && \
     echo "${UNAME}:${UNAME}" | chpasswd && adduser ${UNAME} sudo
 
+ENV PATH=${PATH}:/home/${UNAME}/.local/bin
+
 USER ${UNAME}
 
-# Install Conda
-# Copied from continuumio/miniconda3
-ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
-ENV PATH /home/${UNAME}/miniconda3/bin:$PATH
-ARG MINICONDA_URL=https://repo.anaconda.com/miniconda/Miniconda3-py37_4.8.2-Linux-x86_64.sh
-RUN wget --quiet ${MINICONDA_URL} -O ~/miniconda.sh && \
-    /bin/bash ~/miniconda.sh -b
-
-# Install these in the base conda env
-RUN pip install \
-    tox-conda==0.2.1 \
-    tox==3.15.0
+# Need tox to run the tests
+RUN pip3 install tox==3.15.2

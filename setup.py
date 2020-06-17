@@ -14,7 +14,7 @@ with io.open(README_PATH, "rt", encoding="utf8") as readmefile:
 
 setup(
     name="dtrx",
-    version="8.0.1",
+    version="8.0.2",
     description="Script to intelligently extract multiple archive types",
     author="Brett Smith",
     author_email="brettcsmith@brettcsmith.org",
@@ -37,6 +37,7 @@ setup(
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
     ],
     # long_description="""dtrx extracts archives in a number of different
     #   formats; it currently supports tar, zip (including self-extracting
