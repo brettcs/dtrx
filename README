@@ -33,7 +33,7 @@ directory with the same name as the file you're trying to download.
 
 dtrx supports a number of options to mandate specific behavior:
 
-```manpage
+```
 -r, --recursive
    With this option, dtrx will search inside the archives you specify to see
    if any of the contents are themselves archives, and extract those as
