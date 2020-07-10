@@ -46,3 +46,5 @@ USER ${UNAME}
 
 # Need tox to run the tests
 RUN pip3 install tox==3.15.2
+
+WORKDIR /mnt/workspace
