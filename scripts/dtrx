@@ -35,7 +35,6 @@ import signal
 import stat
 import string
 import struct
-import subprocess
 import sys
 import tempfile
 import termios
@@ -47,6 +46,10 @@ try:
     import urlparse
 except ModuleNotFoundError:
     import urllib.parse as urlparse
+try:
+    import subprocess32 as subprocess
+except ModuleNotFoundError:
+    import subprocess
 
 if sys.version_info[0] >= 3:
     get_input = input
@@ -202,6 +205,17 @@ class BaseExtractor(object):
                 raise ExtractorUnusable("could not run %s" % (command[0],))
             raise
 
+    def timeout_check(self, pipe):
+        pass
+
+    def wait_for_exit(self, pipe):
+        while True:
+            try:
+                return pipe.wait(timeout=1)
+            except subprocess.TimeoutExpired:
+                logging.debug("timeout hit..")
+                self.timeout_check(pipe)
+
     def run_pipes(self, final_stdout=None):
         if not self.pipes:
             return
@@ -220,7 +234,7 @@ class BaseExtractor(object):
             else:
                 stdout = subprocess.PIPE
             self.add_process(processes, command, stdin, stdout)
-        self.exit_codes = [pipe.wait() for pipe in processes]
+        self.exit_codes = [self.wait_for_exit(pipe) for pipe in processes]
         self.archive.close()
         for index in range(last_pipe):
             processes[index].stdout.close()

@@ -2,6 +2,7 @@
 
 import io
 import os
+import sys
 
 from setuptools import setup
 
@@ -11,6 +12,11 @@ README_PATH = os.path.abspath(
 )
 with io.open(README_PATH, "rt", encoding="utf8") as readmefile:
     README = readmefile.read()
+
+if sys.version_info <= (3,2):
+    install_requires = ["subprocess32"]
+else:
+    install_requires = []
 
 setup(
     name="dtrx",
@@ -56,4 +62,5 @@ setup(
     # using markdown as pypi description:
     # https://dustingram.com/articles/2018/03/16/markdown-descriptions-on-pypi
     setup_requires=["setuptools>=38.6.0", "wheel>=0.31.0", "twine>=1.11.0"],
+    install_requires=install_requires,
 )
