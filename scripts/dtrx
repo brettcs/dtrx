@@ -214,6 +214,7 @@ class BaseExtractor(object):
         self.content_type = None
         self.content_name = None
         self.pipes = []
+        self.user_stdin = False
         self.stderr = ''
         self.exit_codes = []
         try:
@@ -260,7 +261,7 @@ class BaseExtractor(object):
         processes = []
         for index, command in enumerate([pipe[0] for pipe in self.pipes]):
             if index == 0:
-                stdin = self.archive
+                stdin = None if self.user_stdin else self.archive
             else:
                 stdin = processes[-1].stdout
             if index == last_pipe and has_output_target:
@@ -562,6 +563,7 @@ class NoPipeExtractor(BaseExtractor):
         os.close(os.open(filename, os.O_RDONLY))
         BaseExtractor.__init__(self, '/dev/null', None)
         self.filename = os.path.realpath(filename)
+        self.user_stdin = True
 
     def extract_archive(self):
         self.extract_pipe = self.extract_command + [self.filename]
@@ -714,6 +716,17 @@ class RarExtractor(NoPipeExtractor):
                     yield line.strip()
                 isfile = not isfile
         self.archive.close()
+
+    def timeout_check(self, pipe):
+        nbs = NonblockingRead(pipe.stderr)
+        errs = nbs.readlines()
+
+        self.stderr += ''.join(errs)
+
+        # pass through the password prompt, if unrar sent one
+        if errs and "password" in errs[-1]:
+            sys.stdout.write('\n' + ''.join(errs))
+            sys.stdout.flush()
 
 
 class UnarchiverExtractor(NoPipeExtractor):
