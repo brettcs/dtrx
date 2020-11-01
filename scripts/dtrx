@@ -1346,7 +1346,7 @@ class ExtractorApplication(object):
                 if extractor.target is not None:
                     self.clean_destination(extractor.target)
             else:
-                self.show_stderr(logger.warn, extractor.get_stderr())
+                self.show_stderr(logger.warning, extractor.get_stderr())
                 self.recurse(filename, extractor, self.action)
                 return
         logger.error("could not handle %s" % (filename,))
