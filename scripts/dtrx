@@ -154,6 +154,39 @@ class DirectoryChecker(FilenameChecker):
         return tempfile.mkdtemp(prefix=self.original_name + '.', dir='.')
 
 
+class NonblockingRead(object):
+    iostream = None
+
+    def __init__(self, iostream):
+        self.iostream = iostream
+
+        fd = iostream.fileno()
+        flags = fcntl.fcntl(fd, fcntl.F_GETFL)
+        fcntl.fcntl(fd, fcntl.F_SETFL, flags | os.O_NONBLOCK)
+
+    def python_2_readlines(self):
+        # XXX: There seems to be a bug in Python 2 where readline() returns
+        # "IOError: [Errno 11] Resource temporarily unavailable" on a
+        # non-blocking read from a pipe where the output lacks a newline.
+        # It doesn't happen in Python 3, so this hack can be deleted once we
+        # no longer care about Python 2.
+        out = ''
+        try:
+            while True:
+                # read a single byte at a time until we hit IOError
+                out += self.iostream.read(1).decode("ascii", "ignore")
+        except IOError:
+            pass
+        return out.splitlines(True)
+
+    def readlines(self):
+        if sys.version_info[0] >= 3:
+            out = self.iostream.readlines()
+            return [line.decode("ascii", "ignore") for line in out]
+        else:
+            return self.python_2_readlines()
+
+
 class ExtractorError(Exception):
     pass
 
@@ -546,6 +579,16 @@ class ZipExtractor(NoPipeExtractor):
     def is_fatal_error(self, status):
         return (status or 0) > 1
 
+    def timeout_check(self, pipe):
+        nbs = NonblockingRead(pipe.stderr)
+        errs = nbs.readlines()
+
+        self.stderr += ''.join(errs)
+
+        # pass through the password prompt, if unzip sent one
+        if errs and "password" in errs[-1]:
+            sys.stdout.write('\n' + errs[-1])
+            sys.stdout.flush()
 
 class LZHExtractor(ZipExtractor):
     file_type = 'LZH file'
