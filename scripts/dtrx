@@ -216,6 +216,7 @@ class BaseExtractor(object):
         self.pipes = []
         self.user_stdin = False
         self.stderr = ''
+        self.pw_prompted = False
         self.exit_codes = []
         try:
             self.archive = open(filename, 'r')
@@ -353,6 +354,7 @@ class BaseExtractor(object):
         if (self.is_fatal_error(error_code) or
             ((not got_files) and (error_code is not None))):
             command = ' '.join(self.pipes[error_index][0])
+            self.pw_prompt = False  # Don't silently fail with wrong password
             raise ExtractorError("%s error: '%s' returned status code %s" %
                                  (self.pipes[error_index][1], command,
                                   error_code))
@@ -592,6 +594,7 @@ class ZipExtractor(NoPipeExtractor):
         if errs and "password" in errs[-1]:
             sys.stdout.write('\n' + errs[-1])
             sys.stdout.flush()
+            self.pw_prompted = True
 
 class LZHExtractor(ZipExtractor):
     file_type = 'LZH file'
@@ -651,6 +654,7 @@ class SevenExtractor(NoPipeExtractor):
         if errs and "password" in errs[-1]:
             sys.stdout.write('\n' + errs[-1])
             sys.stdout.flush()
+            self.pw_prompted = True
 
 
 class CABExtractor(NoPipeExtractor):
@@ -727,6 +731,7 @@ class RarExtractor(NoPipeExtractor):
         if errs and "password" in errs[-1]:
             sys.stdout.write('\n' + ''.join(errs))
             sys.stdout.flush()
+            self.pw_prompted = True
 
 
 class UnarchiverExtractor(NoPipeExtractor):
@@ -1426,7 +1431,13 @@ class ExtractorApplication(object):
                 if extractor.target is not None:
                     self.clean_destination(extractor.target)
             else:
-                self.show_stderr(logger.warning, extractor.stderr)
+                logfunc = logger.warning
+                if extractor.pw_prompted:
+                    # Normally stderr contains actual errors. If the archive
+                    # contained a password, stderr is full of prompts; only
+                    # relevant when debugging.
+                    logfunc = logger.debug
+                self.show_stderr(logfunc, extractor.stderr)
                 self.recurse(filename, extractor, self.action)
                 return
         logger.error("could not handle %s" % (filename,))
