@@ -20,7 +20,7 @@ else:
 
 setup(
     name="dtrx",
-    version="8.0.2",
+    version="8.1.0",
     description="Script to intelligently extract multiple archive types",
     author="Brett Smith",
     author_email="brettcsmith@brettcsmith.org",
