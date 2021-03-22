@@ -35,7 +35,6 @@ import signal
 import stat
 import string
 import struct
-import subprocess
 import sys
 import tempfile
 import termios
@@ -47,6 +46,10 @@ try:
     import urlparse
 except ModuleNotFoundError:
     import urllib.parse as urlparse
+try:
+    import subprocess32 as subprocess
+except ModuleNotFoundError:
+    import subprocess
 
 if sys.version_info[0] >= 3:
     get_input = input
@@ -151,6 +154,39 @@ class DirectoryChecker(FilenameChecker):
         return tempfile.mkdtemp(prefix=self.original_name + '.', dir='.')
 
 
+class NonblockingRead(object):
+    iostream = None
+
+    def __init__(self, iostream):
+        self.iostream = iostream
+
+        fd = iostream.fileno()
+        flags = fcntl.fcntl(fd, fcntl.F_GETFL)
+        fcntl.fcntl(fd, fcntl.F_SETFL, flags | os.O_NONBLOCK)
+
+    def python_2_readlines(self):
+        # XXX: There seems to be a bug in Python 2 where readline() returns
+        # "IOError: [Errno 11] Resource temporarily unavailable" on a
+        # non-blocking read from a pipe where the output lacks a newline.
+        # It doesn't happen in Python 3, so this hack can be deleted once we
+        # no longer care about Python 2.
+        out = ''
+        try:
+            while True:
+                # read a single byte at a time until we hit IOError
+                out += self.iostream.read(1).decode("ascii", "ignore")
+        except IOError:
+            pass
+        return out.splitlines(True)
+
+    def readlines(self):
+        if sys.version_info[0] >= 3:
+            out = self.iostream.readlines()
+            return [line.decode("ascii", "ignore") for line in out]
+        else:
+            return self.python_2_readlines()
+
+
 class ExtractorError(Exception):
     pass
 
@@ -178,7 +214,9 @@ class BaseExtractor(object):
         self.content_type = None
         self.content_name = None
         self.pipes = []
-        self.stderr = tempfile.TemporaryFile()
+        self.user_stdin = False
+        self.stderr = ''
+        self.pw_prompted = False
         self.exit_codes = []
         try:
             self.archive = open(filename, 'r')
@@ -196,13 +234,25 @@ class BaseExtractor(object):
         try:
             processes.append(subprocess.Popen(command, stdin=stdin,
                                               stdout=stdout,
-                                              stderr=self.stderr))
+                                              stderr=subprocess.PIPE))
         except OSError as error:
             if error.errno == errno.ENOENT:
                 raise ExtractorUnusable("could not run %s" % (command[0],))
             raise
 
+    def timeout_check(self, pipe):
+        pass
+
+    def wait_for_exit(self, pipe):
+        while True:
+            try:
+                return pipe.wait(timeout=1)
+            except subprocess.TimeoutExpired:
+                logging.debug("timeout hit..")
+                self.timeout_check(pipe)
+
     def run_pipes(self, final_stdout=None):
+        has_output_target = True if final_stdout else False
         if not self.pipes:
             return
         elif final_stdout is None:
@@ -212,15 +262,19 @@ class BaseExtractor(object):
         processes = []
         for index, command in enumerate([pipe[0] for pipe in self.pipes]):
             if index == 0:
-                stdin = self.archive
+                stdin = None if self.user_stdin else self.archive
             else:
                 stdin = processes[-1].stdout
-            if index == last_pipe:
+            if index == last_pipe and has_output_target:
                 stdout = final_stdout
             else:
                 stdout = subprocess.PIPE
             self.add_process(processes, command, stdin, stdout)
-        self.exit_codes = [pipe.wait() for pipe in processes]
+        self.exit_codes = [self.wait_for_exit(pipe) for pipe in processes]
+        for pipe in processes:
+            # Grab any remaining error messages
+            errs = pipe.stderr.readlines()
+            self.stderr += b''.join(errs).decode("ascii", "ignore")
         self.archive.close()
         for index in range(last_pipe):
             processes[index].stdout.close()
@@ -284,12 +338,6 @@ class BaseExtractor(object):
             pieces.pop()
         return '.'.join(pieces)
 
-    def get_stderr(self):
-        self.stderr.seek(0, 0)
-        errors = self.stderr.read(-1)
-        self.stderr.close()
-        return errors
-
     def is_fatal_error(self, status):
         return False
 
@@ -306,6 +354,7 @@ class BaseExtractor(object):
         if (self.is_fatal_error(error_code) or
             ((not got_files) and (error_code is not None))):
             command = ' '.join(self.pipes[error_index][0])
+            self.pw_prompt = False  # Don't silently fail with wrong password
             raise ExtractorError("%s error: '%s' returned status code %s" %
                                  (self.pipes[error_index][1], command,
                                   error_code))
@@ -516,6 +565,7 @@ class NoPipeExtractor(BaseExtractor):
         os.close(os.open(filename, os.O_RDONLY))
         BaseExtractor.__init__(self, '/dev/null', None)
         self.filename = os.path.realpath(filename)
+        self.user_stdin = True
 
     def extract_archive(self):
         self.extract_pipe = self.extract_command + [self.filename]
@@ -534,6 +584,17 @@ class ZipExtractor(NoPipeExtractor):
     def is_fatal_error(self, status):
         return (status or 0) > 1
 
+    def timeout_check(self, pipe):
+        nbs = NonblockingRead(pipe.stderr)
+        errs = nbs.readlines()
+
+        self.stderr += ''.join(errs)
+
+        # pass through the password prompt, if unzip sent one
+        if errs and "password" in errs[-1]:
+            sys.stdout.write('\n' + errs[-1])
+            sys.stdout.flush()
+            self.pw_prompted = True
 
 class LZHExtractor(ZipExtractor):
     file_type = 'LZH file'
@@ -582,6 +643,18 @@ class SevenExtractor(NoPipeExtractor):
             elif fn_index is not None:
                 yield line[fn_index:]
         self.archive.close()
+
+    def timeout_check(self, pipe):
+        nbs = NonblockingRead(pipe.stdout)
+        errs = nbs.readlines()
+
+        self.stderr += ''.join(errs)
+
+        # pass through the password prompt, if 7z sent one
+        if errs and "password" in errs[-1]:
+            sys.stdout.write('\n' + errs[-1])
+            sys.stdout.flush()
+            self.pw_prompted = True
 
 
 class CABExtractor(NoPipeExtractor):
@@ -647,6 +720,18 @@ class RarExtractor(NoPipeExtractor):
                     yield line.strip()
                 isfile = not isfile
         self.archive.close()
+
+    def timeout_check(self, pipe):
+        nbs = NonblockingRead(pipe.stderr)
+        errs = nbs.readlines()
+
+        self.stderr += ''.join(errs)
+
+        # pass through the password prompt, if unrar sent one
+        if errs and "password" in errs[-1]:
+            sys.stdout.write('\n' + ''.join(errs))
+            sys.stdout.flush()
+            self.pw_prompted = True
 
 
 class UnarchiverExtractor(NoPipeExtractor):
@@ -1333,7 +1418,7 @@ class ExtractorApplication(object):
     def show_stderr(self, logger_func, stderr):
         if stderr:
             logger_func("Error output from this process:\n" +
-                        stderr.rstrip(b'\n').decode("ascii", "ignore"))
+                        stderr.rstrip('\n'))
 
     def try_extractors(self, filename, builder):
         errors = []
@@ -1342,11 +1427,17 @@ class ExtractorApplication(object):
             error = self.action.run(filename, extractor)
             if error:
                 errors.append((extractor.file_type, extractor.encoding, error,
-                               extractor.get_stderr()))
+                               extractor.stderr))
                 if extractor.target is not None:
                     self.clean_destination(extractor.target)
             else:
-                self.show_stderr(logger.warn, extractor.get_stderr())
+                logfunc = logger.warning
+                if extractor.pw_prompted:
+                    # Normally stderr contains actual errors. If the archive
+                    # contained a password, stderr is full of prompts; only
+                    # relevant when debugging.
+                    logfunc = logger.debug
+                self.show_stderr(logfunc, extractor.stderr)
                 self.recurse(filename, extractor, self.action)
                 return
         logger.error("could not handle %s" % (filename,))
