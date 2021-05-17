@@ -25,10 +25,10 @@ case $RUN_JOB in
         # execute tox in the docker container. don't run in parallel; the test
         # script writes files to an in-tree location, so run serially to avoid
         # clobbering during the tests
-        docker run -v "$(pwd)":/mnt/workspace -t "$DOCKER_IMAGE_NAME" bash -c "tox $TOX_ARGS"
+        docker run --rm -v "$(pwd)":/mnt/workspace -t "$DOCKER_IMAGE_NAME" bash -c "tox $TOX_ARGS"
     ;;
     rst2man)
         # build man page from README
-        docker run -v "$(pwd)":/mnt/workspace -t "$DOCKER_IMAGE_NAME" bash gen-manpage.sh README dtrx.1
+        docker run --rm -v "$(pwd)":/mnt/workspace -t "$DOCKER_IMAGE_NAME" bash gen-manpage.sh README dtrx.1
     ;;
 esac
