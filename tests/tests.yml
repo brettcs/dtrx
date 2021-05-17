@@ -805,3 +805,17 @@
     cd test-recursive-no-prompt
     tar -jxf ../$1
   antigrep: '.'
+
+- name: uncompressed dmg
+  filenames: test.dmg
+  baseline: |
+    mkdir test
+    cd test
+    7z x ../$1
+
+- name: compressed dmg
+  filenames: test.compressed.dmg
+  baseline: |
+    mkdir test.compressed
+    cd test.compressed
+    7z x ../$1

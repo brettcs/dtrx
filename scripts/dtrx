@@ -1077,6 +1077,13 @@ class ExtractorBuilder(object):
                              'mimetypes': ('x-msi', 'x-ole-storage'),
                              'extensions': ('msi',),
                              'magic': ('Application: Windows Installer',)},
+                     'dmg': {'extractors': (SevenExtractor,),
+                             'mimetypes': ('x-apple-diskimage',),
+                             'extensions': ('dmg',),
+                             'magic': (
+                                 'ISO 9660 CD-ROM filesystem data',
+                                 'zlib compressed data',
+                             )},
                      'compress': {'extractors': (CompressionExtractor,)}
                      }
 
