@@ -6,3 +6,7 @@ build
 /*.egg-info/
 /dist/
 /dtrx.1
+__pycache__
+
+# generated during setup.py run
+/scripts/dtrxc

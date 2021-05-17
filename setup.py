@@ -7,9 +7,9 @@ import sys
 from setuptools import setup
 
 # Get long description from readme
-README_PATH = os.path.abspath(
-    os.path.join(os.environ.get("TOX_INI_DIR", "."), "README.md")
-)
+ROOT_PATH = os.path.abspath(
+    os.path.join(os.environ.get("TOX_INI_DIR", ".")))
+README_PATH = os.path.join(ROOT_PATH, "README.md")
 with io.open(README_PATH, "rt", encoding="utf8") as readmefile:
     README = readmefile.read()
 
@@ -18,9 +18,16 @@ if sys.version_info <= (3,2):
 else:
     install_requires = []
 
+# get version number from dtrx
+# suppress the deprecation warning for imp, it's for py 2.7/3.x compat
+import warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning)
+import imp
+dtrx = imp.load_source("dtrx", os.path.join(ROOT_PATH, "scripts/dtrx"))
+
 setup(
     name="dtrx",
-    version="8.1.0",
+    version=dtrx.VERSION,
     description="Script to intelligently extract multiple archive types",
     author="Brett Smith",
     author_email="brettcsmith@brettcsmith.org",

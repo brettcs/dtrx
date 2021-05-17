@@ -44,11 +44,11 @@ import traceback
 # Python 3 compatibility hacks commence
 try:
     import urlparse
-except ModuleNotFoundError:
+except ImportError:
     import urllib.parse as urlparse
 try:
     import subprocess32 as subprocess
-except ModuleNotFoundError:
+except ImportError:
     import subprocess
 
 if sys.version_info[0] >= 3:
@@ -63,7 +63,7 @@ try:
 except NameError:
     from sets import Set as set
 
-VERSION = "8.0.0"
+VERSION = "8.2.0"
 VERSION_BANNER = """dtrx version %s
 Copyright © 2006-2011 Brett Smith <brettcsmith@brettcsmith.org>
 Copyright © 2008 Peter Kelemen <Peter.Kelemen@gmail.com>
