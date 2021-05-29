@@ -200,7 +200,7 @@ EXTRACTION_ERRORS = (ExtractorError, ExtractorUnusable, OSError, IOError)
 class BaseExtractor(object):
     decoders = {'bzip2': ['bzcat'], 'gzip': ['zcat'], 'compress': ['zcat'],
                 'lzma': ['lzcat'], 'xz': ['xzcat'], 'lzip': ['lzip', '-cd'],
-                'lrzip': ['lrzcat', '-q'], 'lrz': ['lrzcat', '-q']}
+                'lrzip': ['lrzcat', '-q'], 'lrz': ['lrzcat', '-q'], 'zstd': ['zstd', '-d'],}
     name_checker = DirectoryChecker
 
     def __init__(self, filename, encoding):
@@ -657,6 +657,25 @@ class SevenExtractor(NoPipeExtractor):
             self.pw_prompted = True
 
 
+class ZstandardExtractor(NoPipeExtractor):
+    file_type = 'zstd file'
+    extract_command = ['zstd', '-d']
+    list_command = ['zstd', '-l']
+    border_re = re.compile('^[- ]+$')
+
+    def get_filenames(self):
+        fn_index = None
+        for line in NoPipeExtractor.get_filenames(self):
+            if self.border_re.match(line):
+                if fn_index is not None:
+                    break
+                else:
+                    fn_index = string.rindex(line, ' ') + 1
+            elif fn_index is not None:
+                yield line[fn_index:]
+        self.archive.close()
+
+
 class CABExtractor(NoPipeExtractor):
     file_type = 'CAB archive'
     extract_command = ['cabextract', '-q']
@@ -1084,6 +1103,10 @@ class ExtractorBuilder(object):
                                  'ISO 9660 CD-ROM filesystem data',
                                  'zlib compressed data',
                              )},
+                     'zst': {'extractors': (ZstandardExtractor,),
+                             'mimetypes': ('application/zstd',),
+                             'extensions': ('zst','zstd',),
+                             'magic': ('Zstandard compressed data',)},
                      'compress': {'extractors': (CompressionExtractor,)}
                      }
 
@@ -1107,6 +1130,7 @@ class ExtractorBuilder(object):
                     ('tar', 'lz', 'tar.lz'),
                     ('tar', 'compress', 'tar.Z', 'taz'),
                     ('tar', 'lrz', 'tar.lrz'),
+                    ('tar', 'zstd', 'tar.zst'),
                     ('compress', 'gzip', 'Z', 'gz'),
                     ('compress', 'bzip2', 'bz2'),
                     ('compress', 'lzma', 'lzma'),
@@ -1121,6 +1145,7 @@ class ExtractorBuilder(object):
                     ('lzma', 'LZMA compressed'),
                     ('lzip', 'lzip compressed'),
                     ('lrzip', 'LRZIP compressed'),
+                    ('zstd', 'Zstandard compressed'),
                     ('xz', 'xz compressed')):
         for pattern in mapping[1:]:
             magic_encoding_map[re.compile(pattern)] = mapping[0]
@@ -1128,6 +1153,10 @@ class ExtractorBuilder(object):
     def __init__(self, filename, options):
         self.filename = filename
         self.options = options
+
+        # Hack, extend the python mimetypes list to support zstd too
+        for name in ('.zst', '.zstd',):
+            mimetypes.encodings_map[name] = 'zstd'
 
     def build_extractor(self, archive_type, encoding):
         type_info = self.extractor_map[archive_type]

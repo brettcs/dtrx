@@ -819,3 +819,13 @@
     mkdir test.compressed
     cd test.compressed
     7z x ../$1
+
+- name: zstd compressed tar
+  filenames: test.tar.zst
+  baseline: |
+    tar --zstd -xf $1
+
+- name: zstd compressed single file
+  filenames: test-text.zst
+  baseline: |
+    zstd -d $1 -o test-text
