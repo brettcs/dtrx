@@ -232,6 +232,7 @@ class BaseExtractor(object):
 
     def add_process(self, processes, command, stdin, stdout):
         try:
+            logger.debug("running command: {}".format(command))
             processes.append(subprocess.Popen(command, stdin=stdin,
                                               stdout=stdout,
                                               stderr=subprocess.PIPE))
