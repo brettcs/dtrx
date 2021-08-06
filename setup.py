@@ -7,13 +7,12 @@ import sys
 from setuptools import setup
 
 # Get long description from readme
-ROOT_PATH = os.path.abspath(
-    os.path.join(os.environ.get("TOX_INI_DIR", ".")))
+ROOT_PATH = os.path.abspath(os.path.join(os.environ.get("TOX_INI_DIR", ".")))
 README_PATH = os.path.join(ROOT_PATH, "README.md")
 with io.open(README_PATH, "rt", encoding="utf8") as readmefile:
     README = readmefile.read()
 
-if sys.version_info <= (3,2):
+if sys.version_info <= (3, 2):
     install_requires = ["subprocess32"]
 else:
     install_requires = []
@@ -21,8 +20,10 @@ else:
 # get version number from dtrx
 # suppress the deprecation warning for imp, it's for py 2.7/3.x compat
 import warnings
+
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 import imp
+
 dtrx = imp.load_source("dtrx", os.path.join(ROOT_PATH, "scripts/dtrx"))
 
 setup(
@@ -32,7 +33,9 @@ setup(
     author="Brett Smith",
     author_email="brettcsmith@brettcsmith.org",
     url="http://www.brettcsmith.org/2007/dtrx/",
-    project_urls={"Code": "https://github.com/dtrx-py/dtrx",},
+    project_urls={
+        "Code": "https://github.com/dtrx-py/dtrx",
+    },
     download_url="https://github.com/dtrx-py/dtrx",
     scripts=["scripts/dtrx"],
     license="GNU General Public License, version 3 or later",
@@ -57,7 +60,6 @@ setup(
     #   .exe files), cpio, rpm, deb, gem, 7z, cab, rar, lzh, arj, and
     #   InstallShield files.  It can also decompress files compressed with gzip,
     #   bzip2, lzma, xz, lrzip, lzip, or compress.
-
     #   In addition to providing one command to handle many different archive
     #   types, dtrx also aids the user by extracting contents consistently.
     #   By default, everything will be written to a dedicated directory

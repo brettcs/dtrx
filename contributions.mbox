@@ -26,8 +26,8 @@ diff -r ececf7836546 scripts/dtrx
 +++ b/scripts/dtrx	Sat Sep 20 00:50:16 2008 +0200
 @@ -515,6 +515,25 @@ class ShieldExtractor(NoPipeExtractor):
          return result
- 
- 
+
+
 +class RarExtractor(NoPipeExtractor):
 +    file_type = 'RAR archive'
 +    extract_command = ['unrar', 'x']
@@ -101,7 +101,7 @@ so, please use my Peter.Kelemen@gmail.com address.
 Thanks,
 Peter
 
--- 
+--
     .+'''+.         .+'''+.         .+'''+.         .+'''+.         .+''
  Kelemen Péter     /       \       /       \     Peter.Kelemen@gmail.com
 .+'         `+...+'         `+...+'         `+...+'         `+...+'
@@ -110,7 +110,7 @@ Peter
 From - Thu Dec 01 18:53:16 2011
 Return-Path: <ville.skytta@iki.fi>
 X-Spam-Checker-Version: SpamAssassin 3.3.1 (2010-03-16) on llewellyn
-X-Spam-Level: 
+X-Spam-Level:
 X-Spam-Status: No, score=-1.9 required=5.0 tests=BAYES_00,SPF_PASS
 	autolearn=ham version=3.3.1
 X-Original-To: me@brettcsmith.org
@@ -149,24 +149,22 @@ On 12/01/2011 02:00 AM, Brett Smith wrote:
 >> BTW, you mentioned earlier that you were applying some of my initial
 >> trival patches but I don't see them in the public hg repo yet, did you
 >> find a problem with them?
-> 
-> No, no problem.  That's really weird -- they started showing up at 
-> <http://brettcsmith.org/2007/dtrx/dtrx/> as soon as I pushed them, and 
-> when I clone that repository with hg they show up in the log too.  How 
+>
+> No, no problem.  That's really weird -- they started showing up at
+> <http://brettcsmith.org/2007/dtrx/dtrx/> as soon as I pushed them, and
+> when I clone that repository with hg they show up in the log too.  How
 > are you checking this?
 
 hg pull -u.  But I see the two first ones are indeed in the repository,
 so it's possible that I've managed to mess up something locally.  No
 problem, I'll probably just throw away my earlier clone.
 
-> I'm happy with the second round of patches too, but I meant to ask 
-> before I apply them: since they're more substantive, can I go ahead and 
-> add your copyright line to the source code?  And can you please just 
-> confirm that you're okay with this code being distributed under GPLv3 or 
+> I'm happy with the second round of patches too, but I meant to ask
+> before I apply them: since they're more substantive, can I go ahead and
+> add your copyright line to the source code?  And can you please just
+> confirm that you're okay with this code being distributed under GPLv3 or
 > later?
 
 Yes, go ahead, and GPLv3+ is fine.  (That means that I may need to
 switch from GPLv2+ to GPLv3+ for some other utilities I have that may be
 using dtrx in the future, but that shouldn't be a problem.)
-
-
