@@ -94,9 +94,10 @@ dtrx-8.2.2-py2.py3-none-any.whl  dtrx-8.2.2.tar.gz
 # permissions on the dtrx GitHub repo
 ❯ export DTRX_TAGNAME=$(python -c 'from dtrx import dtrx; print(dtrx.VERSION)')
 ❯ gh release create --generate-notes ${DTRX_TAGNAME}
-# generate a zipapp too!
-❯ python -m zipapp dtrx --compress --main "dtrx:main" --python "/usr/bin/env python" --output dtrx-${DTRX_TAGNAME}
-❯ gh release upload ${DTRX_TAGNAME} dist/* dtrx.pyz
+# generate a zipapp and copy the standalone script too into ./dist/
+❯ python -m zipapp dtrx --compress --main "dtrx:main" --python "/usr/bin/env python" --output dist/dtrx-${DTRX_TAGNAME}.pyz
+❯ cp dtrx/dtrx.py dist/
+❯ gh release upload ${DTRX_TAGNAME} dist/*
 ```
 
 ### Tests
