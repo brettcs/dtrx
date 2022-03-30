@@ -28,9 +28,11 @@ dist/dtrx-$(DTRX_TAGNAME).pyz: dtrx/dtrx.py
 	mkdir -p $(dir $@)
 	python -m zipapp dtrx --compress --main "dtrx:main" --python "/usr/bin/env python" --output $@
 
+# build the wheel and source dist
 dist/dtrx-8.3.0-py2.py3-none-any.whl dist/dtrx-8.3.0.tar.gz &: dtrx/dtrx.py
 	python -m build
 
+.PHONY: publish-release
 publish-release: $(BUILD_ARTIFACTS)
 # first confirm that we're on a tag
 	git describe --exact-match || (echo ERROR: not on a tag; false)

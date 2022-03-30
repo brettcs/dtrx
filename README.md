@@ -89,7 +89,8 @@ for maintainers is the below steps:
 
    be sure to push the tag, `git push --tags`.
 
-3. use the `make publish-release` command to build and publish to GitHub and PyPi
+3. use the `make publish-release` command to build and publish to GitHub and
+   PyPi
 
 See the [`Makefile`](Makefile) for details on what that rule does.
 
