@@ -68,37 +68,30 @@ address the problem quickly.
 ### Releases
 
 Releases are tagged in this repo and published to pypi.org. The release process
-is the following (unfortunately manual) steps:
+for maintainers is the below steps:
 
-```bash
-# update the VERSION value in dtrx/dtrx.py, then:
-❯ git add dtrx/dtrx.py
-❯ git commit  # fill in the commit message
+1. update the version specifier:
 
-# create an annotated tag for the release. usually good to put a list of new
-# commits since the previous tag, for example by listing them with:
-# ❯ git log $(git describe --tags --abbrev=0)..HEAD --oneline
-❯ git tag -a <version number>
+   ```bash
+   # update the VERSION value in dtrx/dtrx.py, then:
+   ❯ git add dtrx/dtrx.py
+   ❯ git commit  # fill in the commit message
+   ```
 
-# build the release archives (requires the 'build' package, `pip install build`)
-❯ python -m build
+2. create an annotated tag for the release. usually good to put a list of new
+   commits since the previous tag, for example by listing them with:
 
-# confirm the correct build artifacts were generated
-❯ ls dist
-dtrx-8.2.2-py2.py3-none-any.whl  dtrx-8.2.2.tar.gz
+   ```bash
+   ❯ git log $(git describe --tags --abbrev=0)..HEAD --oneline
+   # create the annotated tag
+   ❯ git tag -a <version number>
+   ```
 
-# upload to pypi.org (requires a user account on the dtrx project)
-❯ twine upload dist/*
+   be sure to push the tag, `git push --tags`.
 
-# optional, but nice to do, create a GitHub Release for the tag. requires
-# permissions on the dtrx GitHub repo
-❯ export DTRX_TAGNAME=$(python -c 'from dtrx import dtrx; print(dtrx.VERSION)')
-❯ gh release create --generate-notes ${DTRX_TAGNAME}
-# generate a zipapp and copy the standalone script too into ./dist/
-❯ python -m zipapp dtrx --compress --main "dtrx:main" --python "/usr/bin/env python" --output dist/dtrx-${DTRX_TAGNAME}.pyz
-❯ cp dtrx/dtrx.py dist/
-❯ gh release upload ${DTRX_TAGNAME} dist/*
-```
+3. use the `make publish-release` command to build and publish to GitHub and PyPi
+
+See the [`Makefile`](Makefile) for details on what that rule does.
 
 ### Tests
 
