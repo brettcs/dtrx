@@ -123,5 +123,3 @@ pre-commit install
 
 pre-commit will run anytime `git commit` runs (disable with `--no-verify`). You
 can manually run it with `pre-commit run`.
-
-It's also run in CI.
