@@ -62,3 +62,15 @@ jobs:
         with:
           name: manpage-output
           path: dtrx.1
+
+  windows:
+    runs-on: ubuntu-20.04
+
+    steps:
+      # checkout v2, with recursive submodule update
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: ❌ Verify Windows Install Fails
+        run: RUN_JOB=windows ./test.sh

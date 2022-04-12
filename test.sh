@@ -36,4 +36,9 @@ case $RUN_JOB in
         # build man page from README
         docker run --rm -v "$(pwd)":/workspace -t "$DOCKER_IMAGE_NAME" bash tools/gen-manpage.sh archived/README dtrx.1
     ;;
+    windows)
+        # verify that installing on windows fails
+        docker run --rm -v "$(pwd)":/workdir -t tobix/pywine:3.9 bash -c 'wine pip install /workdir' | tee /dev/stderr | \
+            grep -q 'ERROR: No matching distribution found for platform==unsupported' || echo "ERROR: pip install should fail!"
+    ;;
 esac
