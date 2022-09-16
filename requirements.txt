@@ -1,5 +1,6 @@
 # Development requirements
 
+build==0.8.0
 docutils==0.16
 invoke==1.7.1
 pre-commit==2.20.0
