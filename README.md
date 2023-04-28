@@ -3,7 +3,7 @@
 version](https://img.shields.io/pypi/v/dtrx.svg?style=for-the-badge&logo=PyPi&logoColor=white)](https://pypi.org/project/dtrx/)
 [![PyPI
 pyversions](https://img.shields.io/pypi/pyversions/dtrx.svg?style=for-the-badge&logo=python&logoColor=white&color=ff69b4)](https://pypi.python.org/pypi/dtrx/)
-[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/dtrx-py/dtrx/main-ci/master?logo=github-actions&logoColor=white&style=for-the-badge)](https://github.com/dtrx-py/dtrx/actions)
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/dtrx-py/dtrx/main.yml?&branch=master&logo=github-actions&logoColor=white&style=for-the-badge)](https://github.com/dtrx-py/dtrx/actions?query=branch%3Amaster+)
 
 <!-- toc -->
 
