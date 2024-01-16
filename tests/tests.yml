@@ -865,6 +865,50 @@
   grep: "cannot extract encrypted archive"
   cleanup: stty -F /dev/stdout echo
 
+- name: password zip noninteractive with password
+  filenames: test-pw.zip
+  options: "-n -p yolo"
+  baseline: |
+    mkdir test-pw
+    cd test-pw
+    unzip -P yolo -q $1
+  posttest: |
+    exec [ "$(cat test-pw)" = "test-pw" ]
+  cleanup: rm -rf test-pw
+
+- name: password 7z noninteractive with password
+  filenames: test-pw.7z
+  options: "-n -p yolo"
+  baseline: |
+    mkdir test-pw
+    cd test-pw
+    7z x $1 -pyolo -q
+  posttest: |
+    exec [ "$(cat test-pw)" = "test-pw" ]
+  cleanup: rm -rf test-pw
+
+- name: password rar noninteractive with password
+  filenames: test-pw.rar
+  options: "-n -p yolo"
+  baseline: |
+    mkdir test-pw
+    cd test-pw
+    unrar e -pyolo -q $1
+  posttest: |
+    exec [ "$(cat test-pw)" = "test-pw" ]
+  cleanup: rm -rf test-pw
+
+- name: password arj noninteractive with password
+  filenames: test-pw.7z
+  options: "-n -p yolo"
+  baseline: |
+    mkdir test-pw
+    cd test-pw
+    arj x -gyolo $1
+  posttest: |
+    exec [ "$(cat test-pw)" = "test-pw" ]
+  cleanup: rm -rf test-pw
+
 - name: brotli
   filenames: test-text.br
   baseline: |

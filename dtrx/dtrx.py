@@ -237,6 +237,7 @@ class BaseExtractor(object):
         self.filename = os.path.realpath(filename)
         self.encoding = encoding
         self.ignore_pw = False
+        self.password = None
         self.file_count = 0
         self.included_archives = []
         self.target = None
@@ -279,10 +280,9 @@ class BaseExtractor(object):
             try:
                 return pipe.wait(timeout=1)
             except subprocess.TimeoutExpired:
-                logging.debug("timeout hit..")
+                logging.debug("timeout hit...")
                 self.timeout_check(pipe)
-                # Verify that we're not trying to extract password-protected
-                # archives in non-interactive mode
+                # Verify that we're not waiting for a password in non-interactive mode
                 if self.pw_prompted and self.ignore_pw:
                     pipe.kill()
                     # Whatever extractor we're using probably left the
@@ -292,7 +292,7 @@ class BaseExtractor(object):
                     self.stderr = ""
                     raise ExtractorError(
                         "cannot extract encrypted archive '%s' in non-interactive mode"
-                        % (self.filename)
+                        " without a password" % (self.filename)
                     )
 
     def send_stdout_to_dev_null(self):
@@ -417,8 +417,9 @@ class BaseExtractor(object):
         self.pipe(self.extract_pipe)
         self.run_pipes()
 
-    def extract(self, ignore_passwd=False):
+    def extract(self, ignore_passwd=False, password=None):
         self.ignore_pw = ignore_passwd
+        self.password = password
         try:
             self.target = tempfile.mkdtemp(prefix=".dtrx-", dir=".")
         except (OSError, IOError) as error:
@@ -484,8 +485,9 @@ class CompressionExtractor(BaseExtractor):
             raise ExtractorError("doesn't look like a compressed file")
         yield self.basename()
 
-    def extract(self, ignore_passwd=False):
+    def extract(self, ignore_passwd=False, password=None):
         self.ignore_pw = ignore_passwd
+        self.password = password
         self.content_type = ONE_ENTRY_KNOWN
         self.content_name = self.basename()
         self.contents = None
@@ -651,8 +653,17 @@ class NoPipeExtractor(BaseExtractor):
 
 class ZipExtractor(NoPipeExtractor):
     file_type = "Zip file"
-    extract_command = ["unzip", "-q"]
     list_command = ["zipinfo", "-1"]
+
+    @property
+    def extract_command(self):
+        """
+        Returns the extraction command and adds a password if given.
+        """
+        cmd = ["unzip", "-q"]
+        if self.password:
+            cmd.append("-P %s" % (self.password,))
+        return cmd
 
     def is_fatal_error(self, status):
         return (status or 0) > 1
@@ -702,9 +713,18 @@ class LZHExtractor(ZipExtractor):
 
 class SevenExtractor(NoPipeExtractor):
     file_type = "7z file"
-    extract_command = ["7z", "x"]
     list_command = ["7z", "l"]
     border_re = re.compile("^[- ]+$")
+
+    @property
+    def extract_command(self):
+        """
+        Returns the extraction command and adds a password if given.
+        """
+        cmd = ["7z", "x"]
+        if self.password:
+            cmd.append("-p%s" % (self.password,))
+        return cmd
 
     def get_filenames(self):
         fn_index = None
@@ -809,9 +829,18 @@ class ShieldExtractor(NoPipeExtractor):
 
 class RarExtractor(NoPipeExtractor):
     file_type = "RAR archive"
-    extract_command = ["unrar", "x"]
     list_command = ["unrar", "v"]
     border_re = re.compile("^-+$")
+
+    @property
+    def extract_command(self):
+        """
+        Returns the extraction command and adds a password if given.
+        """
+        cmd = ["unrar", "x"]
+        if self.password:
+            cmd.append("-p%s" % (self.password,))
+        return cmd
 
     def get_filenames(self):
         inside = False
@@ -843,8 +872,17 @@ class RarExtractor(NoPipeExtractor):
 
 class UnarchiverExtractor(NoPipeExtractor):
     file_type = "RAR archive"
-    extract_command = ["unar", "-D"]
     list_command = ["lsar"]
+
+    @property
+    def extract_command(self):
+        """
+        Returns the extraction command and adds a password if given.
+        """
+        cmd = ["unar", "-D"]
+        if self.password:
+            cmd.append("-p %s" % (self.password,))
+        return cmd
 
     def get_filenames(self):
         output = NoPipeExtractor.get_filenames(self)
@@ -856,9 +894,18 @@ class UnarchiverExtractor(NoPipeExtractor):
 
 class ArjExtractor(NoPipeExtractor):
     file_type = "ARJ archive"
-    extract_command = ["arj", "x", "-y"]
     list_command = ["arj", "v"]
     prefix_re = re.compile(r"^\d+\)\s+")
+
+    @property
+    def extract_command(self):
+        """
+        Returns the extraction command and adds a password if given.
+        """
+        cmd = ["arj", "x", "-y"]
+        if self.password:
+            cmd.append("-g%s" % (self.password,))
+        return cmd
 
     def get_filenames(self):
         for line in NoPipeExtractor.get_filenames(self):
@@ -1482,7 +1529,7 @@ class ExtractionAction(BaseAction):
     def run(self, filename, extractor):
         self.current_filename = filename
         error = (
-            self.report(extractor.extract, self.options.batch)
+            self.report(extractor.extract, self.options.batch, self.options.password)
             or self.report(self.get_handler, extractor)
             or self.report(self.current_handler.handle)
             or self.report(self.show_extraction, extractor)
@@ -1631,6 +1678,13 @@ class ExtractorApplication(object):
             action="store_true",
             default=False,
             help="don't ask how to handle special cases",
+        )
+        parser.add_option(
+            "-p",
+            "--password",
+            dest="password",
+            default=None,
+            help="provide a password for password-protected archives",
         )
         parser.add_option(
             "-o",
