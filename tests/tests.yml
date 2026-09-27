@@ -780,11 +780,25 @@
 - name: partly failed extraction
   options: -n
   filenames: test-tar-with-node.tar.gz
+  error: true
   baseline: |
     mkdir test-tar-with-node
     cd test-tar-with-node
     tar -zxf ../$1
-  grep: Cannot mknod
+  grep:
+    - Cannot mknod
+    - only partly extracted
+
+- name: truncated compressed file
+  options: -n
+  prerun: |
+    seq 1 300000 | gzip | head -c 200000 >test-truncated.gz
+  filenames: test-truncated.gz
+  error: true
+  posttest: |
+    exec [ -s test-truncated ]
+  grep: only partly extracted
+  cleanup: rm -f test-truncated test-truncated.gz
 
 - name: flat extraction of one-file archive
   directory: inside-dir
@@ -887,7 +901,9 @@
 
 - name: password zip noninteractive with password
   filenames: test-pw.zip
-  options: "-n -p yolo"
+  # -vv so a failed unzip attempt, hidden by falling back to 7z, shows up
+  options: "-n -p yolo -vv"
+  antigrep: returned status code
   baseline: |
     mkdir test-pw
     cd test-pw

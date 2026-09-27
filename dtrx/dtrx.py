@@ -210,6 +210,7 @@ class BaseExtractor(object):
         self.stderr = ""
         self.pw_prompted = False
         self.exit_codes = []
+        self.partial_error = None
         try:
             self.archive = open(filename, "r")
         except (IOError, OSError) as error:
@@ -350,6 +351,9 @@ class BaseExtractor(object):
     def is_fatal_error(self, status):
         return False
 
+    def is_warning(self, status):
+        return False
+
     def first_bad_exit_code(self):
         for index, code in enumerate(self.exit_codes):
             if code > 0:
@@ -365,6 +369,15 @@ class BaseExtractor(object):
             raise ExtractorError(
                 "%s error: '%s' returned status code %s"
                 % (self.pipes[error_index][1], command, error_code)
+            )
+        if (error_code is not None) and not self.is_warning(error_code):
+            # Some files were extracted, but not everything worked. Keep what
+            # we got, but report the extraction as failed.
+            command = " ".join(self.pipes[error_index][0])
+            self.partial_error = "%s error: '%s' returned status code %s" % (
+                self.pipes[error_index][1],
+                command,
+                error_code,
             )
 
     def extract_archive(self):
@@ -612,11 +625,16 @@ class ZipExtractor(NoPipeExtractor):
         """
         cmd = ["unzip", "-q"]
         if self.password:
-            cmd.append("-P %s" % (self.password,))
+            cmd.extend(["-P", self.password])
         return cmd
 
     def is_fatal_error(self, status):
         return (status or 0) > 1
+
+    def is_warning(self, status):
+        # unzip: "one or more warning errors were encountered, but processing
+        # completed successfully anyway"
+        return status == 1
 
     def timeout_check(self, pipe):
         nbs = NonblockingRead(pipe.stderr)
@@ -635,6 +653,9 @@ class LZHExtractor(ZipExtractor):
     file_type = "LZH file"
     extract_command = ["lha", "xq"]
     list_command = ["lha", "l"]
+
+    def is_warning(self, status):
+        return False
 
     def border_line_file_index(self, line):
         last_space_index = None
@@ -827,7 +848,7 @@ class UnarchiverExtractor(NoPipeExtractor):
         """
         cmd = ["unar", "-D"]
         if self.password:
-            cmd.append("-p %s" % (self.password,))
+            cmd.extend(["-p", self.password])
         return cmd
 
     def get_filenames(self):
@@ -1742,6 +1763,13 @@ class ExtractorApplication(object):
                 errors.append((extractor.file_type, extractor.encoding, error, extractor.stderr))
                 if extractor.target is not None:
                     self.clean_destination(extractor.target)
+            elif extractor.partial_error:
+                logger.error(
+                    "%s was only partly extracted: %s" % (filename, extractor.partial_error)
+                )
+                self.show_stderr(logger.error, extractor.stderr)
+                self.recurse(filename, extractor, self.action)
+                return True
             else:
                 logfunc = logger.warning
                 if extractor.pw_prompted:
